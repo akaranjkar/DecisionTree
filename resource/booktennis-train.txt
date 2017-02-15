@@ -12,4 +12,3 @@ Sunny Mild Normal Strong Yes
 Overcast Mild High Strong Yes
 Overcast Hot normal Weak Yes
 Rain Mild High Strong No
-
