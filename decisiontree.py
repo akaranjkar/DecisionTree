@@ -1,6 +1,6 @@
 import math
 from db import DB
-from tree import Tree, Node, LeafNode
+from tree import Node
 
 
 class DecisionTree:
@@ -98,7 +98,7 @@ class DecisionTree:
             root_node.set_label(most_common_value)
         else:
             # a = attribute that best classifies examples
-            best_attribute = ''
+            best_attribute = None
             max_gain = 0
             for attribute in attributes:
                 attribute_gain = self.information_gain(table, attribute)
@@ -127,6 +127,7 @@ class DecisionTree:
                 else:
                     # else below this new branch add the subtree id3(examples, target attribute, attributes - a)
                     child_node = Node()
+                    child_node.set_parent_decision_attribute_value({best_attribute:value})
                     root_node.add_child(child_node)
                     self.id3(new_view, child_node)
         return root_node
@@ -134,10 +135,9 @@ class DecisionTree:
     def build_tree(self, table):
         root_node = Node()
         self.id3(table, root_node)
-        return root_node
+        root_node.print(0)
 
 
 dt = DecisionTree("tennis")
 # dt.information_gain("tennis","Wind")
-test_node = dt.build_tree("tennis")
-print(test_node)
+dt.build_tree("tennis")

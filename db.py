@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 
 class DB:
@@ -8,7 +9,11 @@ class DB:
 
     # Constructor
     def __init__(self, dbname, attributes_file):
-        self.__dbname = dbname + "db"
+        dbfile = dbname + "db"
+        # Clear database file if it exists
+        if os.path.exists("data/" + dbfile):
+            os.remove("data/" + dbfile)
+        self.__dbname = dbfile
         # Create first table with same name as the DB name
         self.create_initial_table(dbname, attributes_file)
 
