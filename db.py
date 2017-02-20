@@ -124,6 +124,15 @@ class DB:
         self.disconnect()
         return rows
 
+    # Fetch all rows
+    def fetch_all_rows(self,table_name):
+        self.connect()
+        cursor = self.__cursor
+        cursor.execute("SELECT * FROM " + table_name)
+        rows = cursor.fetchall()
+        self.disconnect()
+        return rows
+
     # Create a view
     def create_view(self, source_table, attribute_dict):
         #attribs = ",".join(attribute_dict.keys())

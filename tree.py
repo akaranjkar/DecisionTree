@@ -18,10 +18,21 @@ class Tree:
 
 
 class Node:
+    __decision_attribute = None
+    __label = None
     __parent_node = None
     __parent_attribute_value = None
     __attribute = None
     __children = []
+
+    def set_decision_attribute(self,decision_attribute):
+        self.__decision_attribute = decision_attribute
+
+    def set_label(self,label):
+        self.__label = label
+
+    def add_child(self,child_node):
+        self.__children.append(child_node)
 
     def children(self):
         return self.__children
