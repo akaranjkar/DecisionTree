@@ -1,35 +1,20 @@
 import math
 from db import DB
 from tree import Node
+from rules import RuleSet,Rule
 
 
 class DecisionTree:
     __db = None
-    __tree = None
     __collection = None
-
-    # __finalv1 = None
-    # __finalv2 = None
+    __root_node = None
 
     def __init__(self, selection):
         if selection == "tennis":
             self.__collection = selection
             self.__db = DB("tennis", "tennis-attr.txt")
             self.__db.load_initial_data("tennis", "booktennis-train.txt")
-            self.__finalv1 = "Yes"
-            self.__finalv2 = "No"
-
-    # def calculate_entropy(self, positive_examples, negative_examples):
-    #     total_examples = positive_examples + negative_examples
-    #     entropy = - ((positive_examples / total_examples) * math.log2(positive_examples / total_examples)) - \
-    #               ((negative_examples / total_examples) * math.log2(negative_examples / total_examples))
-    #     return entropy
-    #
-    # def collection_entropy(self):
-    #     finalattr = self.__db.last_column(self.__collection)
-    #     v1count = len(self.__db.fetch_matching_rows(self.__collection, finalattr, self.__finalv1))
-    #     v2count = len(self.__db.fetch_matching_rows(self.__collection, finalattr, self.__finalv2))
-    #     return self.calculate_entropy(v1count, v2count)
+            self.__root_node = Node()
 
     def entropy(self, table):
         finalattr = self.__db.last_column(table)
@@ -133,9 +118,11 @@ class DecisionTree:
         return root_node
 
     def build_tree(self, table):
-        root_node = Node()
-        self.id3(table, root_node)
-        root_node.print(0)
+        self.__root_node = self.id3(table,self.__root_node)
+        self.__root_node.print(0)
+        ruleset = RuleSet()
+        ruleset.get_rules_from_tree(self.__root_node,{},'')
+        ruleset.print_rules()
 
 
 dt = DecisionTree("tennis")
