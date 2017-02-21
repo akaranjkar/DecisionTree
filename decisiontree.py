@@ -2,24 +2,23 @@ import math
 from db import DB
 from tree import Node
 from rules import RuleSet,Rule
-
+from predictor import Predictor
 
 class DecisionTree:
 
     def __init__(self, selection):
-        self.root_node = None
+        self.root_node = Node()
+        self.ruleset = RuleSet()
         if selection == "tennis":
             self.collection = selection
             self.collection_type = "discrete"
-            self.db = DB("tennis", "tennis-attr.txt")
-            self.db.load_initial_data("tennis", "booktennis-train.txt")
-            self.root_node = Node()
+            self.db = DB("tennis", "tennis-attr.txt",self.collection_type)
+            self.db.load_initial_data("tennis", "tennis-train.txt")
         elif selection == "iris":
             self.collection = selection
             self.collection_type = "real"
-            self.db = DB("iris", "iris-attr.txt")
-            self.db.load_initial_data("tennis", "iris-train.txt")
-            self.root_node = Node()
+            self.db = DB("iris", "iris-attr.txt",self.collection_type)
+            self.db.load_initial_data("iris", "iris-train.txt")
 
     def entropy(self, table):
         finalattr = self.db.last_column(table)
@@ -125,11 +124,17 @@ class DecisionTree:
     def build_tree(self, table):
         self.root_node = self.id3(table, self.root_node)
         self.root_node.print(0)
-        ruleset = RuleSet()
-        ruleset.get_rules_from_tree(self.root_node, {}, '')
-        ruleset.print_rules()
+        print()
+        self.ruleset.get_rules_from_tree(self.root_node, {}, '')
+        self.ruleset.print_rules()
 
 
 dt = DecisionTree("tennis")
 # dt.information_gain("tennis","Wind")
-# dt.build_tree("tennis")
+dt.build_tree("tennis")
+print()
+p = Predictor("tennis-attr.txt")
+p.load_test_data("tennis-train.txt")
+p.all_tests_ruleset(dt.ruleset)
+print("-" * 20)
+p.all_tests_tree(dt.root_node)
