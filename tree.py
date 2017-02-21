@@ -1,49 +1,49 @@
 class Node:
-    __decision_attribute = None
-    __label = None
-    __parent_decision_attribute_value = None
-    __children = []
+    # decision_attribute = None
+    # label = None
+    # parent_decision_attribute_value = None
+    # children = []
 
     def __init__(self):
-        self.__decision_attribute = None
-        self.__label = None
-        self.__parent_decision_attribute_value = None
-        self.__children = []
+        self.decision_attribute = None
+        self.label = None
+        self.parent_decision_attribute_value = None
+        self.children = []
 
     def set_decision_attribute(self,decision_attribute):
-        self.__decision_attribute = decision_attribute
+        self.decision_attribute = decision_attribute
 
     def set_label(self,label):
-        self.__label = label
+        self.label = label
 
     def set_parent_decision_attribute_value(self,parent_decision_attribute_value):
-        self.__parent_decision_attribute_value = parent_decision_attribute_value
+        self.parent_decision_attribute_value = parent_decision_attribute_value
 
     def add_child(self,child_node):
-        self.__children.append(child_node)
+        self.children.append(child_node)
 
-    def children(self):
-        return self.__children
+    def get_children(self):
+        return self.children
 
-    def decision_attribute(self):
-        return self.__decision_attribute
+    def get_decision_attribute(self):
+        return self.decision_attribute
 
-    def label(self):
-        return self.__label
+    def get_label(self):
+        return self.label
 
-    def parent_decision_attribute_value(self):
-        return self.__parent_decision_attribute_value
+    def get_parent_decision_attribute_value(self):
+        return self.parent_decision_attribute_value
 
     def print(self,level):
-        if self.__parent_decision_attribute_value != None:
+        if self.parent_decision_attribute_value != None:
             if level > 0:
                 print("|\t" * (level - 1),end='')
-            parent_decision_attribute = list(self.__parent_decision_attribute_value.keys())[0]
-            parent_decision_value = self.__parent_decision_attribute_value[parent_decision_attribute]
+            parent_decision_attribute = list(self.parent_decision_attribute_value.keys())[0]
+            parent_decision_value = self.parent_decision_attribute_value[parent_decision_attribute]
             print(parent_decision_attribute + " = " + parent_decision_value,end='')
-        if len(self.__children) != 0:
+        if len(self.children) != 0:
             print()
-            for child in self.__children:
+            for child in self.children:
                 child.print(level+1)
-        if self.__label != None:
-            print(" : " + self.__label)
+        if self.label != None:
+            print(" : " + self.label)

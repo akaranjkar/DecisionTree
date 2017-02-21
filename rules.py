@@ -13,32 +13,30 @@ class RuleSet:
         return self.rules
 
     def get_rules_from_tree(self, root_node, antecedent, consequent):
-        if root_node.parent_decision_attribute_value() == None: # Root of tree
-            if (len(root_node.children()) == 0) and (root_node.label() != None): # No children, only a label
+        if root_node.get_parent_decision_attribute_value() == None: # Root of tree
+            if (len(root_node.get_children()) == 0) and (root_node.get_label() != None): # No children, only a label
                 rule = Rule()
-                rule.set_consequent(root_node.label())
-                rule.print()
+                rule.set_consequent(root_node.get_label())
                 self.add_rule(rule)
-            elif (len(root_node.children()) != 0) and (root_node.label() == None): # Has children
-                for child in root_node.children():
+            elif (len(root_node.get_children()) != 0) and (root_node.get_label() == None): # Has children
+                for child in root_node.get_children():
                     child_antecedent = OrderedDict()
                     self.get_rules_from_tree(child, child_antecedent, consequent)
-        elif (len(root_node.children()) != 0) and (root_node.label() == None): # Internal node
-            parent_decision_attribute = list(root_node.parent_decision_attribute_value().keys())[0]
-            parent_decision_value = root_node.parent_decision_attribute_value()[parent_decision_attribute]
+        elif (len(root_node.get_children()) != 0) and (root_node.get_label() == None): # Internal node
+            parent_decision_attribute = list(root_node.get_parent_decision_attribute_value().keys())[0]
+            parent_decision_value = root_node.get_parent_decision_attribute_value()[parent_decision_attribute]
             child_antecedent = copy.deepcopy(antecedent)
             child_antecedent[parent_decision_attribute] = parent_decision_value
-            for child in root_node.children():
+            for child in root_node.get_children():
                 self.get_rules_from_tree(child, child_antecedent, consequent)
-        elif (len(root_node.children()) == 0) and (root_node.label() != None): # Leaf node
-            parent_decision_attribute = list(root_node.parent_decision_attribute_value().keys())[0]
-            parent_decision_value = root_node.parent_decision_attribute_value()[parent_decision_attribute]
+        elif (len(root_node.get_children()) == 0) and (root_node.get_label() != None): # Leaf node
+            parent_decision_attribute = list(root_node.get_parent_decision_attribute_value().keys())[0]
+            parent_decision_value = root_node.get_parent_decision_attribute_value()[parent_decision_attribute]
             child_antecedent = copy.deepcopy(antecedent)
             child_antecedent[parent_decision_attribute] = parent_decision_value
             rule = Rule()
             rule.set_antecedent(child_antecedent)
-            rule.set_consequent(root_node.label())
-            rule.print()
+            rule.set_consequent(root_node.get_label())
             self.add_rule(rule)
 
     def print_rules(self):
@@ -56,11 +54,6 @@ class Rule:
 
     def set_antecedent(self,antecedent):
         self.antecedent = antecedent
-
-    # def add_antecedent(self,antecedent):
-    #     key = list(antecedent.keys())[0]
-    #     value = antecedent[key]
-    #     self.antecedent[key] = value
 
     def get_consequent(self):
         return self.consequent

@@ -3,46 +3,45 @@ import os
 
 
 class DB:
-    __dbname = None
-    __dbhandle = None
-    __cursor = None
 
     # Constructor
-    def __init__(self, dbname, attributes_file):
+    def __init__(self, dbname, attributes_file,collection_type):
+        self.dbhandle = None
+        self.cursor = None
         dbfile = dbname + "db"
         # Clear database file if it exists
         if os.path.exists("data/" + dbfile):
             os.remove("data/" + dbfile)
-        self.__dbname = dbfile
+        self.dbname = dbfile
         # Create first table with same name as the DB name
-        self.create_initial_table(dbname, attributes_file)
+        self.create_initial_table(dbname, attributes_file,collection_type)
 
     # Connect to a DB and set the cursor
     def connect(self):
-        self.__dbhandle = sqlite3.connect("data/" + self.__dbname)
-        self.__cursor = self.__dbhandle.cursor()
+        self.dbhandle = sqlite3.connect("data/" + self.dbname)
+        self.cursor = self.dbhandle.cursor()
 
     # Commit and disconnect from DB
     def disconnect(self):
-        self.__dbhandle.commit()
-        self.__dbhandle.close()
+        self.dbhandle.commit()
+        self.dbhandle.close()
 
     # Function to clear a table
     def clear_table(self, table_name):
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("DROP TABLE " + table_name)
         self.disconnect()
 
     # Function to drop a view
     def drop_view(self,view_name):
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("DROP VIEW " + view_name)
         self.disconnect()
 
     # Create an initial table to hold all data
-    def create_initial_table(self, table_name, attributes_file):
+    def create_initial_table(self, table_name, attributes_file,collection_type):
         lines = []
         columns = []
         fhandle = open("resource/" + attributes_file, 'r')
@@ -57,14 +56,23 @@ class DB:
 
         # Create table if it doesn't exist
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         tablecheckstmt = "select count(*) from sqlite_master where type='table' and name='" + table_name + "'"
         tablecheck = cursor.execute(tablecheckstmt).fetchone()[0]
         if tablecheck == 0:  # Table doesn't exist. Create it
-            stmt = "CREATE TABLE IF NOT EXISTS " + table_name + "(" + columns[0] + " TEXT)"
-            cursor.execute(stmt)
-            for i in range(1, len(columns)):
-                stmt = "ALTER TABLE " + table_name + " ADD COLUMN " + columns[i] + " TEXT"
+            if collection_type == "discrete":
+                stmt = "CREATE TABLE IF NOT EXISTS " + table_name + "(" + columns[0] + " TEXT)"
+                cursor.execute(stmt)
+                for i in range(1, len(columns)):
+                    stmt = "ALTER TABLE " + table_name + " ADD COLUMN " + columns[i] + " TEXT"
+                    cursor.execute(stmt)
+            elif collection_type == "real":
+                stmt = "CREATE TABLE IF NOT EXISTS " + table_name + "('" + columns[0] + "' REAL)"
+                cursor.execute(stmt)
+                for i in range(1, len(columns) -1 ):
+                    stmt = "ALTER TABLE " + table_name + " ADD COLUMN '" + columns[i] + "' REAL"
+                    cursor.execute(stmt)
+                stmt = "ALTER TABLE " + table_name + " ADD COLUMN '" + columns[-1] + "' TEXT"
                 cursor.execute(stmt)
         self.disconnect()
 
@@ -78,7 +86,7 @@ class DB:
         fhandle.close()
 
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         insertstmt = "INSERT INTO " + table_name + " VALUES (?, ?, ?, ?, ?)"
         cursor.executemany(insertstmt, lines)
         self.disconnect()
@@ -88,7 +96,7 @@ class DB:
         self.connect()
         columns = []
         lines = []
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("PRAGMA table_info([" + table_name + "])")
         lines = cursor.fetchall()
         self.disconnect()
@@ -101,7 +109,7 @@ class DB:
         self.connect()
         columns = []
         lines = []
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("PRAGMA table_info([" + table_name + "])")
         lines = cursor.fetchall()
         self.disconnect()
@@ -112,7 +120,7 @@ class DB:
     # Fetch the possible values for an attribute
     def possible_attribute_values(self, table_name, attribute):
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         possible_values = []
         cursor.execute("SELECT DISTINCT " + attribute + " FROM " + table_name)
         output_tuple_list = cursor.fetchall()
@@ -123,7 +131,7 @@ class DB:
     # Fetch matching rows
     def fetch_matching_rows(self, table_name, attribute, value):
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("SELECT * FROM " + table_name + " WHERE " + attribute + "='" + value + "'")
         rows = cursor.fetchall()
         self.disconnect()
@@ -132,7 +140,7 @@ class DB:
     # Fetch all rows
     def fetch_all_rows(self,table_name):
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute("SELECT * FROM " + table_name)
         rows = cursor.fetchall()
         self.disconnect()
@@ -155,14 +163,14 @@ class DB:
         stmt = "CREATE VIEW " + viewname + "(" + viewcolumns + ") AS SELECT " + viewcolumns + " FROM " \
                + source_table + " WHERE " + stmtcond
         self.connect()
-        cursor = self.__cursor
+        cursor = self.cursor
         cursor.execute(stmt)
         self.disconnect()
         return viewname
 
 
-# db = DB("tennis", "tennis-attr.txt")
-# db.load_initial_data("tennis","booktennis-train.txt")
+db = DB("iris", "iris-attr.txt", "real")
+db.load_initial_data("iris","iris-train.txt")
 # # print(db.fetch_matching_rows("tennis", "PlayTennis", "Yes"))
 # a = {"Outlook" : "Sunny"}
 # db.create_view("tennis", a)

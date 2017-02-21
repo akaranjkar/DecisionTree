@@ -5,23 +5,28 @@ from rules import RuleSet,Rule
 
 
 class DecisionTree:
-    __db = None
-    __collection = None
-    __root_node = None
 
     def __init__(self, selection):
+        self.root_node = None
         if selection == "tennis":
-            self.__collection = selection
-            self.__db = DB("tennis", "tennis-attr.txt")
-            self.__db.load_initial_data("tennis", "booktennis-train.txt")
-            self.__root_node = Node()
+            self.collection = selection
+            self.collection_type = "discrete"
+            self.db = DB("tennis", "tennis-attr.txt")
+            self.db.load_initial_data("tennis", "booktennis-train.txt")
+            self.root_node = Node()
+        elif selection == "iris":
+            self.collection = selection
+            self.collection_type = "real"
+            self.db = DB("iris", "iris-attr.txt")
+            self.db.load_initial_data("tennis", "iris-train.txt")
+            self.root_node = Node()
 
     def entropy(self, table):
-        finalattr = self.__db.last_column(table)
-        finalvalues = self.__db.possible_attribute_values(table, finalattr)
+        finalattr = self.db.last_column(table)
+        finalvalues = self.db.possible_attribute_values(table, finalattr)
         finalvaluecounts = []
         for value in finalvalues:
-            finalvaluecounts.append(len(self.__db.fetch_matching_rows(table, finalattr, value)))
+            finalvaluecounts.append(len(self.db.fetch_matching_rows(table, finalattr, value)))
         total_examples = sum(finalvaluecounts)
         entropy = 0
         for value in finalvaluecounts:
@@ -30,23 +35,23 @@ class DecisionTree:
 
     def information_gain(self, table, attribute):
         samples_entropy = self.entropy(table)  # Entropy of the sample
-        possible_attribute_values = self.__db.possible_attribute_values(table, attribute)
+        possible_attribute_values = self.db.possible_attribute_values(table, attribute)
         samples_per_attribute_value = []  # Number of samples per attribute value
         for value in possible_attribute_values:
-            samples_per_attribute_value.append(len(self.__db.fetch_matching_rows(table, attribute, value)))
+            samples_per_attribute_value.append(len(self.db.fetch_matching_rows(table, attribute, value)))
         total_attribute_samples = sum(samples_per_attribute_value)  # Total samples for the attribute
 
-        finalattr = self.__db.last_column(table)
-        finalvalues = self.__db.possible_attribute_values(table, finalattr)  # Possible final values
+        finalattr = self.db.last_column(table)
+        finalvalues = self.db.possible_attribute_values(table, finalattr)  # Possible final values
 
         attribute_value_entropies = []
         for value in possible_attribute_values:
             d = {attribute: value}
-            temp_view = self.__db.create_view(table, d)  # Create a view temporarily
+            temp_view = self.db.create_view(table, d)  # Create a view temporarily
             finalvaluecounts = []
             for finalvalue in finalvalues:
-                finalvaluecounts.append(len(self.__db.fetch_matching_rows(temp_view, finalattr, finalvalue)))
-            self.__db.drop_view(temp_view)
+                finalvaluecounts.append(len(self.db.fetch_matching_rows(temp_view, finalattr, finalvalue)))
+            self.db.drop_view(temp_view)
             total_examples = sum(finalvaluecounts)
             entropy = 0
             for finalvalue in finalvaluecounts:
@@ -65,9 +70,9 @@ class DecisionTree:
         # Create root node
         # If all examples are +ve return single node tree Root with label = +
         # If all examples are +ve return single node tree Root with label = -
-        finalattr = self.__db.last_column(table)
-        finalvalues = self.__db.possible_attribute_values(table, finalattr)  # Possible final values
-        attributes = self.__db.column_names(table)
+        finalattr = self.db.last_column(table)
+        finalvalues = self.db.possible_attribute_values(table, finalattr)  # Possible final values
+        attributes = self.db.column_names(table)
         attributes.remove(finalattr)
 
         if len(finalvalues) == 1:  # All examples are of same type
@@ -77,7 +82,7 @@ class DecisionTree:
         elif len(attributes) == 0:
             common = {}
             for value in finalvalues:
-                common[value] = len(self.__db.fetch_matching_rows(table, finalattr, value))
+                common[value] = len(self.db.fetch_matching_rows(table, finalattr, value))
             most_common_value = max(common, key=common.get)
             # Return single node tree Root with label = most common value
             root_node.set_label(most_common_value)
@@ -92,19 +97,19 @@ class DecisionTree:
                     best_attribute = attribute
             # decision attribute for root = a
             root_node.set_decision_attribute(best_attribute)
-            possible_values = self.__db.possible_attribute_values(table, best_attribute)
+            possible_values = self.db.possible_attribute_values(table, best_attribute)
             # for each possible value vi of a
             for value in possible_values:
                 # add a new tree branch below root corresponding to test a = vi
                 # let examples be subset of examples that have value vi for a
-                new_view = self.__db.create_view(table, {best_attribute: value})
-                examples_value = self.__db.fetch_all_rows(new_view)
+                new_view = self.db.create_view(table, {best_attribute: value})
+                examples_value = self.db.fetch_all_rows(new_view)
                 # if examples is empty
                 if len(examples_value) == 0:
                     # below this new branch add a leaf node with label = most common value of target attributes in examples
                     common = {}
                     for value in finalvalues:
-                        common[value] = len(self.__db.fetch_matching_rows(table, finalattr, value))
+                        common[value] = len(self.db.fetch_matching_rows(table, finalattr, value))
                     most_common_value = max(common, key=common.get)
                     child_node = Node()
                     child_node.set_label(most_common_value)
@@ -118,13 +123,13 @@ class DecisionTree:
         return root_node
 
     def build_tree(self, table):
-        self.__root_node = self.id3(table,self.__root_node)
-        self.__root_node.print(0)
+        self.root_node = self.id3(table, self.root_node)
+        self.root_node.print(0)
         ruleset = RuleSet()
-        ruleset.get_rules_from_tree(self.__root_node,{},'')
+        ruleset.get_rules_from_tree(self.root_node, {}, '')
         ruleset.print_rules()
 
 
 dt = DecisionTree("tennis")
 # dt.information_gain("tennis","Wind")
-dt.build_tree("tennis")
+# dt.build_tree("tennis")
