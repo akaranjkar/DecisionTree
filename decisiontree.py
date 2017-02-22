@@ -19,6 +19,13 @@ class DecisionTree:
             self.collection_type = "real"
             self.db = DB("iris", "iris-attr.txt",self.collection_type)
             self.db.load_initial_data("iris", "iris-train.txt")
+            self.db.table_name = self.db.transform_real_data(self.db.table_name)
+        elif selection == "bool":
+            self.collection = selection
+            self.collection_type = "discrete"
+            self.db = DB("bool", "bool-attr.txt",self.collection_type)
+            self.db.load_initial_data("bool", "bool-train.txt")
+
 
     def entropy(self, table):
         finalattr = self.db.last_column(table)
@@ -121,7 +128,9 @@ class DecisionTree:
                     self.id3(new_view, child_node)
         return root_node
 
-    def build_tree(self, table):
+    def build_tree(self, table=None):
+        if table == None:
+            table = self.db.table_name
         self.root_node = self.id3(table, self.root_node)
         self.root_node.print(0)
         print()
@@ -129,12 +138,32 @@ class DecisionTree:
         self.ruleset.print_rules()
 
 
-dt = DecisionTree("tennis")
-# dt.information_gain("tennis","Wind")
-dt.build_tree("tennis")
-print()
-p = Predictor("tennis-attr.txt")
-p.load_test_data("tennis-train.txt")
-p.all_tests_ruleset(dt.ruleset)
-print("-" * 20)
-p.all_tests_tree(dt.root_node)
+# dt = DecisionTree("tennis")
+# # # dt.information_gain("tennis","Wind")
+# dt.build_tree("tennis")
+# print()
+# p = Predictor("tennis-attr.txt")
+# p.load_test_data("tennis-test.txt")
+# p.all_tests_ruleset(dt.ruleset)
+# print("-" * 20)
+# p.all_tests_tree(dt.root_node)
+dt1 = DecisionTree("tennis")
+dt1.build_tree()
+p1 = Predictor("tennis-attr.txt")
+p1.load_test_data("tennis-test.txt")
+p1.all_tests_ruleset(dt1.ruleset)
+p1.all_tests_tree(dt1.root_node)
+
+dt2 = DecisionTree("bool")
+dt2.build_tree()
+p2 = Predictor("bool-attr.txt")
+p2.load_test_data("bool-test.txt")
+p2.all_tests_ruleset(dt2.ruleset)
+p2.all_tests_tree(dt2.root_node)
+
+dt3 = DecisionTree("iris")
+dt3.build_tree()
+p3 = Predictor("iris-attr.txt")
+p3.load_test_data("iris-test.txt")
+p3.all_tests_ruleset(dt3.ruleset)
+p3.all_tests_tree(dt3.root_node)

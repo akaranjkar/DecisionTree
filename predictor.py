@@ -61,23 +61,23 @@ class Predictor:
                 if rule_antecedent[key] != test[key]:
                     flag = False
             if flag == True:
-                print("Found matching rule:", end='')
-                rule.print()
+                # print("Found matching rule:", end='')
+                # rule.print()
                 if rule.get_consequent() == test_result:
-                    print("Valid")
+                    # print("Valid")
                     return True
                 else:
-                    print("Invalid")
+                    # print("Invalid")
                     return False
 
     def all_tests_ruleset(self, ruleset):
         valid_tests = 0
         total_tests = 0
         for test in self.get_test_data():
-            print("Test: ", end='')
-            self.print_test(test)
+            # print("Test: ", end='')
+            # self.print_test(test)
             valid = self.test_ruleset(ruleset, test)
-            print()
+            # print()
             total_tests += 1
             if valid:
                 valid_tests += 1
